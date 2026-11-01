@@ -9,5 +9,7 @@ license.workspace = true
 [dependencies]
 glam.workspace = true
 serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
 kud_core = { path = "../kud_core" }
 kud_ecs = { path = "../kud_ecs" }

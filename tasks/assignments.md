@@ -1,38 +1,29 @@
 # Task assignments
 
-Assigned: 130
+Assigned: 109
 Unassigned: 0
 
-## aldair — 13.5 days
+## aldair — 10 days
 
 - [ ] **P0-01** Confirm redistribution rights and clean-room policy (`P0`, 1d)
-- [ ] **P0-03** Set repository, branch, and review rules (`P0`, 0.5d)
-- [ ] **P0-04** Define performance budgets (`P0`, 1d)
 - [ ] **P0-10** Hold vertical-slice planning review (`P0`, 0.5d)
 - [ ] **P12-05** Complete vertical slice demo (`P0`, 3d)
 - [ ] **P2-01** Finalize component schema conventions (`P0`, 0.5d)
 - [ ] **P0-09** Define issue labels and milestones (`P1`, 0.5d)
-- [ ] **P3-06** Add animation clip importer (`P1`, 2d)
 - [ ] **P12-04** Add versioning and update notes (`P2`, 0.5d)
 - [ ] **P12-10** Publish internal alpha (`P2`, 1d)
 - [ ] **P3-07** Add audio asset registry (`P2`, 1d)
 - [ ] **P5-08** Add animation compression (`P2`, 2d)
 
-## arin — 31 days
+## arin — 26 days
 
-- [ ] **P0-05** Define deterministic replay format (`P0`, 1d)
-- [ ] **P1-01** Harden fixed-step clock (`P0`, 1d)
-- [ ] **P1-08** Add state hashing (`P0`, 1d)
-- [ ] **P2-02** Add system scheduling stages (`P0`, 1d)
-- [ ] **P2-03** Add event queues (`P0`, 1d)
-- [ ] **P2-04** Add stable entity handles (`P0`, 1d)
+- [ ] **P0-07** Create asset inventory and licensing sheet (`P0`, 2d)
 - [ ] **P1-02** Add engine configuration loading (`P1`, 1d)
 - [ ] **P1-03** Add structured logging (`P1`, 1d)
 - [ ] **P1-04** Add error taxonomy (`P1`, 1d)
 - [ ] **P1-05** Add platform abstraction (`P1`, 2d)
 - [ ] **P1-06** Add job system foundation (`P1`, 3d)
 - [ ] **P1-07** Add frame allocator strategy (`P1`, 2d)
-- [ ] **P1-09** Add input command buffer (`P1`, 1d)
 - [ ] **P1-10** Add engine lifecycle states (`P1`, 1d)
 - [ ] **P11-09** Run miri/loom on unsafe/concurrent code (`P1`, 2d)
 - [ ] **P2-10** Add simulation snapshot/restore (`P1`, 2d)
@@ -42,15 +33,10 @@ Unassigned: 0
 - [ ] **P9-05** Implement input mapping (`P1`, 2d)
 - [ ] **P9-06** Implement gamepad support (`P2`, 1d)
 
-## bea — 55 days
+## bea — 48 days
 
-- [ ] **P0-06** Create porting map for original scripts (`P0`, 2d)
-- [ ] **P2-05** Add schedule data model (`P0`, 1d)
-- [ ] **P2-06** Add movement system (`P0`, 1d)
-- [ ] **P2-07** Add perception system (`P0`, 2d)
-- [ ] **P2-08** Add school clock and phases (`P0`, 1d)
+- [ ] **P12-08** Complete asset replacement pass (`P0`, 3d)
 - [ ] **P2-09** Add student state machine foundation (`P0`, 2d)
-- [ ] **P7-01** Implement student daily routine (`P0`, 3d)
 - [ ] **P11-11** Optimize simulation hot paths (`P1`, 3d)
 - [ ] **P12-06** Complete 100-student benchmark (`P1`, 3d)
 - [ ] **P5-01** Define animation state machine schema (`P1`, 1d)
@@ -73,9 +59,8 @@ Unassigned: 0
 - [ ] **P7-08** Implement group behavior (`P2`, 2d)
 - [ ] **P7-09** Implement incident response (`P2`, 3d)
 
-## carl — 37 days
+## carl — 35 days
 
-- [ ] **P0-07** Create asset inventory and licensing sheet (`P0`, 2d)
 - [ ] **P3-10** Add replacement asset pipeline (`P0`, 1d)
 - [ ] **P4-01** Finalize render backend trait (`P0`, 1d)
 - [ ] **P4-02** Select GPU backend (`P0`, 2d)
@@ -94,15 +79,9 @@ Unassigned: 0
 - [ ] **P4-08** Implement lighting foundation (`P2`, 3d)
 - [ ] **P4-10** Implement render graph foundation (`P2`, 3d)
 
-## dana — 47.5 days
+## dana — 41 days
 
 - [ ] **P0-02** Create reference capture protocol (`P0`, 1d)
-- [ ] **P0-08** Set up CI matrix (`P0`, 1d)
-- [ ] **P10-07** Implement benchmark harness (`P0`, 2d)
-- [ ] **P11-01** Enforce fmt and clippy in CI (`P0`, 0.5d)
-- [ ] **P11-06** Add frame-time regression checks (`P0`, 1d)
-- [ ] **P3-01** Define asset ID and manifest schema (`P0`, 1d)
-- [ ] **P3-02** Implement asset registry (`P0`, 1d)
 - [ ] **P3-08** Add scene/prefab format (`P0`, 2d)
 - [ ] **P10-01** Implement debug overlay (`P1`, 1d)
 - [ ] **P10-03** Implement schedule editor (`P1`, 3d)
@@ -126,11 +105,11 @@ Unassigned: 0
 - [ ] **P4-12** Add screenshot capture (`P2`, 1d)
 - [ ] **P6-08** Add navigation debug visualization (`P2`, 1d)
 
-## eli — 44 days
+## eli — 43 days
 
-- [ ] **P12-08** Complete asset replacement pass (`P0`, 3d)
 - [ ] **P8-01** Implement player controller (`P0`, 2d)
 - [ ] **P8-02** Implement interaction system (`P0`, 2d)
+- [ ] **P3-06** Add animation clip importer (`P1`, 2d)
 - [ ] **P8-03** Implement inventory foundation (`P1`, 2d)
 - [ ] **P8-04** Implement item entities (`P1`, 2d)
 - [ ] **P9-01** Select UI approach (`P1`, 1d)

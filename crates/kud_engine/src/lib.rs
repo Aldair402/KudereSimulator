@@ -80,7 +80,7 @@ impl Engine {
         let dt = self.clock.step().seconds();
         for _ in 0..steps {
             self.sim.tick(dt);
-            self.pending_events.append(&mut self.sim.events);
+            self.sim.events.drain_previous(&mut self.pending_events);
         }
         self.total_frames += 1;
         Ok(FrameReport {
@@ -127,7 +127,8 @@ mod tests {
         engine.sim.spawn_player(glam::Vec3::ZERO);
         engine
             .sim
-            .spawn_student(1, glam::Vec3::X, kud_sim::Schedule::default());
+            .spawn_student(1, glam::Vec3::X, kud_sim::Schedule::default())
+            .unwrap();
         let mut renderer = NullRenderer::default();
         let draws = engine
             .render(&mut renderer, CameraDesc::looking_at_origin(1.0))

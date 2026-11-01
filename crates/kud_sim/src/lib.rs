@@ -5,12 +5,42 @@
 //! Original C# identifiers are preserved in the porting map and serialized
 //! field names where compatibility is required; Rust code uses idiomatic names.
 
+pub mod events;
+pub mod input;
+pub mod registry;
+pub mod replay;
+pub mod scenario;
+pub mod systems;
+
 use glam::{Quat, Vec3};
+use kud_core::StateHasher;
 use kud_ecs::{Entity, World};
 use serde::{Deserialize, Serialize};
+use thiserror::Error;
+
+pub use events::EventQueue;
+pub use input::InputCommand;
+pub use registry::StudentRegistry;
+pub use replay::{Replay, ReplayError};
 
 /// Original reference: `StudentManagerScript.Students` index.
 pub type StudentId = u32;
+
+/// Errors produced by the simulation layer.
+#[derive(Debug, Error)]
+pub enum SimError {
+    /// A student ID is already bound to an entity.
+    #[error("student id {0} is already registered")]
+    DuplicateStudentId(StudentId),
+
+    /// A student ID is reserved and cannot be assigned.
+    #[error("student id 0 is reserved")]
+    ReservedStudentId,
+
+    /// No student is registered under the requested ID.
+    #[error("unknown student id {0}")]
+    UnknownStudentId(StudentId),
+}
 
 /// World-space position. Original reference: `Transform.position`.
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -54,11 +84,30 @@ pub struct ScheduleBlock {
     pub phase: u8,
 }
 
+impl ScheduleBlock {
+    /// Returns true when the block covers the given minute.
+    #[inline]
+    pub fn contains_minute(&self, minute: u16) -> bool {
+        minute >= self.start_minute && minute < self.end_minute
+    }
+}
+
 /// A student's daily schedule.
 #[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
 pub struct Schedule {
     /// Ordered schedule blocks.
     pub blocks: Vec<ScheduleBlock>,
+}
+
+impl Schedule {
+    /// Returns the block covering a minute, if any.
+    ///
+    /// The first match wins so overlapping blocks resolve deterministically.
+    pub fn block_at(&self, minute: u16) -> Option<&ScheduleBlock> {
+        self.blocks
+            .iter()
+            .find(|block| block.contains_minute(minute))
+    }
 }
 
 /// Simple vision model. Original reference: student vision/detection fields.
@@ -83,12 +132,26 @@ pub struct SchoolClock {
     pub day: u16,
 }
 
+/// Minutes in a full day.
+pub const MINUTES_PER_DAY: u16 = 24 * 60;
+
 impl Default for SchoolClock {
     fn default() -> Self {
         Self {
             minute: 7 * 60,
             day: 0,
         }
+    }
+}
+
+impl SchoolClock {
+    /// Advances the clock, rolling over into the next day.
+    pub fn advance(&mut self, minutes: u16) {
+        let total = u32::from(self.minute) + u32::from(minutes);
+        self.minute = (total % u32::from(MINUTES_PER_DAY)) as u16;
+        self.day = self
+            .day
+            .saturating_add((total / u32::from(MINUTES_PER_DAY)) as u16);
     }
 }
 
@@ -110,7 +173,7 @@ pub enum GameEvent {
 }
 
 /// Simulation configuration.
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 pub struct SimConfig {
     /// In-game minutes advanced per fixed tick.
     pub minutes_per_tick: u16,
@@ -128,12 +191,14 @@ impl Default for SimConfig {
 pub struct Simulation {
     /// ECS world.
     pub world: World,
+    /// Stable student ID to entity map.
+    pub registry: StudentRegistry,
     /// School clock.
     pub clock: SchoolClock,
     /// Simulation configuration.
     pub config: SimConfig,
-    /// Events produced by the current tick.
-    pub events: Vec<GameEvent>,
+    /// Double-buffered event queue.
+    pub events: EventQueue,
     /// Total fixed ticks executed.
     pub tick_count: u64,
 }
@@ -143,9 +208,10 @@ impl Simulation {
     pub fn new(config: SimConfig) -> Self {
         Self {
             world: World::new(),
+            registry: StudentRegistry::new(),
             clock: SchoolClock::default(),
             config,
-            events: Vec::new(),
+            events: EventQueue::new(),
             tick_count: 0,
         }
     }
@@ -156,14 +222,23 @@ impl Simulation {
             .spawn((Position(position), Rotation(Quat::IDENTITY), Player))
     }
 
-    /// Spawns a student with a schedule.
+    /// Spawns a student with a schedule and registers its stable ID.
+    ///
+    /// Rejects duplicate IDs instead of silently overwriting a binding, which
+    /// would orphan the previous entity.
     pub fn spawn_student(
         &mut self,
         student_id: StudentId,
         position: Vec3,
         schedule: Schedule,
-    ) -> Entity {
-        self.world.spawn((
+    ) -> Result<Entity, SimError> {
+        if student_id == 0 {
+            return Err(SimError::ReservedStudentId);
+        }
+        if self.registry.contains(student_id) {
+            return Err(SimError::DuplicateStudentId(student_id));
+        }
+        let entity = self.world.spawn((
             Position(position),
             Rotation(Quat::IDENTITY),
             Facing(Vec3::Z),
@@ -179,107 +254,84 @@ impl Simulation {
                 alive: true,
             },
             schedule,
-        ))
+        ));
+        self.registry.insert(student_id, entity);
+        Ok(entity)
+    }
+
+    /// Despawns a student and releases its stable ID.
+    pub fn despawn_student(&mut self, student_id: StudentId) -> Result<(), SimError> {
+        let entity = self
+            .registry
+            .remove(student_id)
+            .ok_or(SimError::UnknownStudentId(student_id))?;
+        let _ = self.world.despawn(entity);
+        Ok(())
+    }
+
+    /// Returns the entity bound to a student ID.
+    pub fn student_entity(&self, student_id: StudentId) -> Result<Entity, SimError> {
+        self.registry
+            .entity(student_id)
+            .ok_or(SimError::UnknownStudentId(student_id))
     }
 
     /// Advances one fixed simulation tick.
+    ///
+    /// Systems run in a fixed order. Events written during this tick become
+    /// readable through `events.previous()` after the queue flips.
     pub fn tick(&mut self, dt: f32) {
-        self.events.clear();
-        self.clock.minute = self
-            .clock
-            .minute
-            .saturating_add(self.config.minutes_per_tick);
-        if self.clock.minute >= 24 * 60 {
-            self.clock.minute -= 24 * 60;
-            self.clock.day = self.clock.day.saturating_add(1);
-        }
+        self.tick_with_input(dt, InputCommand::Idle);
+    }
 
-        schedule_system(&mut self.world, self.clock.minute, &mut self.events);
-        movement_system(&mut self.world, dt);
-        perception_system(&mut self.world, &mut self.events);
+    /// Advances one fixed tick after applying an input command.
+    pub fn tick_with_input(&mut self, dt: f32, command: InputCommand) {
+        self.clock.advance(self.config.minutes_per_tick);
 
-        // Stable ordering makes replay and test output independent of archetype layout.
-        self.events.sort_by_key(|event| match event {
-            GameEvent::PhaseChanged { student_id, phase } => (*student_id, 0, *phase),
-            GameEvent::StudentNoticedPlayer { student_id } => (*student_id, 1, 0),
-        });
+        input::input_system(&mut self.world, command, dt);
+        systems::schedule_system(&mut self.world, self.clock.minute, &mut self.events);
+        systems::movement_system(&mut self.world, dt);
+        systems::perception_system(&mut self.world, &mut self.events);
+
+        self.events.flip();
         self.tick_count += 1;
     }
-}
 
-/// Selects the active schedule block for each student.
-pub fn schedule_system(world: &mut World, minute: u16, events: &mut Vec<GameEvent>) {
-    for (_, (student, schedule)) in world.query_mut::<(&mut Student, &Schedule)>() {
-        if !student.alive {
-            continue;
-        }
-        if let Some(block) = schedule
-            .blocks
-            .iter()
-            .find(|block| minute >= block.start_minute && minute < block.end_minute)
-        {
-            student.destination = block.destination;
-            if student.phase != block.phase {
-                student.phase = block.phase;
-                events.push(GameEvent::PhaseChanged {
-                    student_id: student.student_id,
-                    phase: block.phase,
-                });
+    /// Computes a deterministic hash of the observable simulation state.
+    ///
+    /// Students are visited in ascending `StudentId` order, not ECS order, so
+    /// the hash is independent of spawn order and archetype layout. Transient
+    /// buffers and the event queue are excluded: they are outputs of a tick,
+    /// not state that carries forward.
+    pub fn state_hash(&self) -> u64 {
+        let mut hasher = StateHasher::new();
+        hasher.write_u64(self.tick_count);
+        hasher.write_u16(self.clock.minute);
+        hasher.write_u16(self.clock.day);
+        hasher.write_u32(self.registry.len() as u32);
+
+        for (student_id, entity) in self.registry.iter() {
+            hasher.write_u32(student_id);
+            let Ok(student) = self.world.get::<&Student>(entity) else {
+                continue;
+            };
+            hasher.write_u8(student.phase);
+            hasher.write_bool(student.alive);
+            hasher.write_f32(student.speed);
+            hasher.write_vec3(student.destination);
+            if let Ok(position) = self.world.get::<&Position>(entity) {
+                hasher.write_vec3(position.0);
             }
         }
-    }
-}
 
-/// Moves students toward their current destination.
-pub fn movement_system(world: &mut World, dt: f32) {
-    for (_, (position, student)) in world.query_mut::<(&mut Position, &Student)>() {
-        if !student.alive || student.speed <= 0.0 {
-            continue;
-        }
-        let to_target = student.destination - position.0;
-        let distance = to_target.length();
-        if distance <= f32::EPSILON {
-            continue;
-        }
-        let step = student.speed * dt;
-        if step >= distance {
-            position.0 = student.destination;
+        if let Some((_, (position, _))) = self.world.query::<(&Position, &Player)>().iter().next() {
+            hasher.write_bool(true);
+            hasher.write_vec3(position.0);
         } else {
-            position.0 += to_target / distance * step;
+            hasher.write_bool(false);
         }
-    }
-}
 
-/// Emits an event when a living student can see the player.
-pub fn perception_system(world: &mut World, events: &mut Vec<GameEvent>) {
-    let player_position = world
-        .query::<(&Position, &Player)>()
-        .iter()
-        .next()
-        .map(|(_, (position, _))| position.0);
-
-    let Some(player_position) = player_position else {
-        return;
-    };
-
-    for (_, (position, facing, perception, student)) in world
-        .query::<(&Position, &Facing, &Perception, &Student)>()
-        .iter()
-    {
-        if !student.alive {
-            continue;
-        }
-        let offset = player_position - position.0;
-        let distance = offset.length();
-        if distance > perception.range || distance <= f32::EPSILON {
-            continue;
-        }
-        let direction = offset / distance;
-        if facing.0.normalize_or_zero().dot(direction) >= perception.fov_cos {
-            events.push(GameEvent::StudentNoticedPlayer {
-                student_id: student.student_id,
-            });
-        }
+        hasher.finish()
     }
 }
 
@@ -308,13 +360,25 @@ mod tests {
         }
     }
 
+    fn walking_schedule() -> Schedule {
+        Schedule {
+            blocks: vec![ScheduleBlock {
+                start_minute: 0,
+                end_minute: MINUTES_PER_DAY,
+                destination: Vec3::new(10.0, 0.0, 0.0),
+                action: "Walk".to_string(),
+                phase: 1,
+            }],
+        }
+    }
+
     #[test]
     fn schedule_changes_phase_and_destination() {
         let mut sim = Simulation::new(SimConfig::default());
-        sim.spawn_student(1, Vec3::ZERO, sample_schedule());
+        sim.spawn_student(1, Vec3::ZERO, sample_schedule()).unwrap();
         sim.clock.minute = 479;
         sim.tick(1.0 / 60.0);
-        assert!(sim.events.contains(&GameEvent::PhaseChanged {
+        assert!(sim.events.previous().contains(&GameEvent::PhaseChanged {
             student_id: 1,
             phase: 2,
         }));
@@ -324,34 +388,118 @@ mod tests {
     fn movement_is_deterministic() {
         let mut a = Simulation::new(SimConfig::default());
         let mut b = Simulation::new(SimConfig::default());
-        let schedule = Schedule {
-            blocks: vec![ScheduleBlock {
-                start_minute: 0,
-                end_minute: 1440,
-                destination: Vec3::new(10.0, 0.0, 0.0),
-                action: "Walk".to_string(),
-                phase: 1,
-            }],
-        };
-        a.spawn_student(1, Vec3::ZERO, schedule.clone());
-        b.spawn_student(1, Vec3::ZERO, schedule);
+        a.spawn_student(1, Vec3::ZERO, walking_schedule()).unwrap();
+        b.spawn_student(1, Vec3::ZERO, walking_schedule()).unwrap();
         for _ in 0..120 {
             a.tick(1.0 / 60.0);
             b.tick(1.0 / 60.0);
         }
-        let pa = a.world.query::<&Position>().iter().next().unwrap().1 .0;
-        let pb = b.world.query::<&Position>().iter().next().unwrap().1 .0;
-        assert_eq!(pa, pb);
+        assert_eq!(a.state_hash(), b.state_hash());
     }
 
     #[test]
     fn perception_emits_event_inside_fov() {
         let mut sim = Simulation::new(SimConfig::default());
         sim.spawn_player(Vec3::new(0.0, 0.0, 5.0));
-        sim.spawn_student(1, Vec3::ZERO, Schedule::default());
+        sim.spawn_student(1, Vec3::ZERO, Schedule::default())
+            .unwrap();
         sim.tick(1.0 / 60.0);
         assert!(sim
             .events
+            .previous()
             .contains(&GameEvent::StudentNoticedPlayer { student_id: 1 }));
+    }
+
+    #[test]
+    fn perception_ignores_player_behind_the_student() {
+        let mut sim = Simulation::new(SimConfig::default());
+        sim.spawn_player(Vec3::new(0.0, 0.0, -5.0));
+        sim.spawn_student(1, Vec3::ZERO, Schedule::default())
+            .unwrap();
+        sim.tick(1.0 / 60.0);
+        assert!(sim.events.previous().is_empty());
+    }
+
+    #[test]
+    fn duplicate_student_id_is_rejected() {
+        let mut sim = Simulation::new(SimConfig::default());
+        sim.spawn_student(1, Vec3::ZERO, Schedule::default())
+            .unwrap();
+        assert!(matches!(
+            sim.spawn_student(1, Vec3::ZERO, Schedule::default()),
+            Err(SimError::DuplicateStudentId(1))
+        ));
+        assert_eq!(sim.registry.len(), 1);
+    }
+
+    #[test]
+    fn student_id_zero_is_reserved() {
+        let mut sim = Simulation::new(SimConfig::default());
+        assert!(matches!(
+            sim.spawn_student(0, Vec3::ZERO, Schedule::default()),
+            Err(SimError::ReservedStudentId)
+        ));
+    }
+
+    #[test]
+    fn despawn_releases_the_id() {
+        let mut sim = Simulation::new(SimConfig::default());
+        sim.spawn_student(1, Vec3::ZERO, Schedule::default())
+            .unwrap();
+        sim.despawn_student(1).unwrap();
+        assert!(!sim.registry.contains(1));
+        assert!(matches!(
+            sim.despawn_student(1),
+            Err(SimError::UnknownStudentId(1))
+        ));
+        sim.spawn_student(1, Vec3::ZERO, Schedule::default())
+            .unwrap();
+    }
+
+    #[test]
+    fn state_hash_ignores_spawn_order() {
+        let mut a = Simulation::new(SimConfig::default());
+        let mut b = Simulation::new(SimConfig::default());
+        for id in [1_u32, 2, 3] {
+            a.spawn_student(id, Vec3::ZERO, walking_schedule()).unwrap();
+        }
+        for id in [3_u32, 1, 2] {
+            b.spawn_student(id, Vec3::ZERO, walking_schedule()).unwrap();
+        }
+        for _ in 0..30 {
+            a.tick(1.0 / 60.0);
+            b.tick(1.0 / 60.0);
+        }
+        assert_eq!(a.state_hash(), b.state_hash());
+    }
+
+    #[test]
+    fn state_hash_detects_position_change() {
+        let mut sim = Simulation::new(SimConfig::default());
+        let entity = sim
+            .spawn_student(1, Vec3::ZERO, Schedule::default())
+            .unwrap();
+        let before = sim.state_hash();
+        sim.world.get::<&mut Position>(entity).unwrap().0 = Vec3::X;
+        assert_ne!(sim.state_hash(), before);
+    }
+
+    #[test]
+    fn school_clock_rolls_over_into_the_next_day() {
+        let mut clock = SchoolClock {
+            minute: MINUTES_PER_DAY - 1,
+            day: 0,
+        };
+        clock.advance(2);
+        assert_eq!(clock.minute, 1);
+        assert_eq!(clock.day, 1);
+    }
+
+    #[test]
+    fn schedule_block_lookup_uses_exclusive_end() {
+        let schedule = sample_schedule();
+        assert_eq!(schedule.block_at(479).unwrap().phase, 1);
+        assert_eq!(schedule.block_at(480).unwrap().phase, 2);
+        assert!(schedule.block_at(540).is_none());
     }
 }
