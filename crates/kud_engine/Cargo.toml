@@ -1,0 +1,15 @@
+[package]
+name = "kud_engine"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+license.workspace = true
+
+[dependencies]
+glam.workspace = true
+tracing.workspace = true
+kud_core = { path = "../kud_core" }
+kud_ecs = { path = "../kud_ecs" }
+kud_sim = { path = "../kud_sim" }
+kud_render = { path = "../kud_render" }

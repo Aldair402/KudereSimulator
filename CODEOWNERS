@@ -1,0 +1,13 @@
+# CODEOWNERS — GitHub handles must exist, otherwise review requests silently fail.
+# Add teammates here as they join; keep squad paths in sync with docs/TEAM_WORKFLOW.md.
+* @Aldair402
+
+/crates/kud_core/ @Aldair402
+/crates/kud_ecs/ @Aldair402
+/crates/kud_sim/ @Aldair402
+/crates/kud_render/ @Aldair402
+/crates/kud_asset/ @Aldair402
+/crates/kud_engine/ @Aldair402
+/crates/kud_runner/ @Aldair402
+/docs/ @Aldair402
+/tasks/ @Aldair402
