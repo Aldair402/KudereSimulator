@@ -1,0 +1,7 @@
+name,role,squad,capacity_days
+aldair,tech-lead,leads,0
+arin,engine-dev,engine,0
+bea,sim-dev,simulation,0
+carl,render-dev,render,0
+dana,tools-dev,tools-qa,0
+eli,gameplay-dev,gameplay,0
