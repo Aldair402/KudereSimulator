@@ -6,7 +6,6 @@ P0-10,P0 Foundation,Governance,Hold vertical-slice planning review,"Select one s
 P12-05,P12 Release and parity,Parity,Complete vertical slice demo,"One school day, 10 students, one interaction, one detection event.",Demo recorded and compared against reference behavior.,P7-01,3,tech-lead,leads,P0,todo,aldair
 P12-08,P12 Release and parity,Parity,Complete asset replacement pass,Replace or license all assets used in slice.,Asset audit passes; no original unlicensed assets packaged.,P3-10,3,producer,assets,P0,todo,bea
 P2-01,P2 ECS and simulation,ECS,Finalize component schema conventions,"Define POD components, handles, and forbidden reference types.",Schema guide merged; example components reviewed.,-,0.5,tech-lead,simulation,P0,todo,aldair
-P2-09,P2 ECS and simulation,ECS,Add student state machine foundation,Data-driven states and transitions instead of giant Update branches.,State transition table tested; no dynamic dispatch in hot loop.,P2-08,2,sim-dev,simulation,P0,todo,bea
 P3-08,P3 Assets and scenes,Assets,Add scene/prefab format,Data-only scene graph with entity templates and component overrides.,Scene round-trip tested; prefab override rules documented.,P3-02,2,tools-dev,assets,P0,todo,dana
 P3-10,P3 Assets and scenes,Assets,Add replacement asset pipeline,Track original-to-replacement asset mapping and license status.,No unlicensed original asset can be packaged by CI check.,P0-07,1,producer,assets,P0,todo,carl
 P4-01,P4 Renderer,Render,Finalize render backend trait,"Support frames, cameras, meshes, materials, skins, and debug lines.",Null renderer implements trait; trait reviewed by render and engine owners.,-,1,render-dev,render,P0,todo,carl
@@ -59,8 +58,6 @@ P6-03,P6 Physics and navigation,Physics,Implement spatial index,"Broadphase for 
 P6-04,P6 Physics and navigation,Physics,Implement raycast/occlusion queries,Line-of-sight and interaction raycasts.,Perception occlusion tests pass.,P6-03,1,sim-dev,simulation,P1,todo,bea
 P6-05,P6 Physics and navigation,Navigation,Select pathfinding approach,"Navmesh, grid, or waypoint graph for school layout.",Decision record includes authoring workflow.,P6-03,1,sim-dev,simulation,P1,todo,bea
 P6-06,P6 Physics and navigation,Navigation,Implement path queries,"Find path, smooth path, and replan on blockage.",Agents reach destinations in test map.,P6-05,3,sim-dev,simulation,P1,todo,bea
-P7-02,P7 AI and school simulation,AI,Implement attention and suspicion,"Suspicion accumulation, decay, and reporting thresholds.","Suspicion tests cover sight, sound, and memory decay.",P2-07,2,sim-dev,simulation,P1,todo,bea
-P7-03,P7 AI and school simulation,AI,Implement witness memory,Store witnessed events with confidence and decay.,Witness report changes based on elapsed time and evidence.,P7-02,2,sim-dev,simulation,P1,todo,bea
 P7-10,P7 AI and school simulation,AI,Add AI regression scenarios,Recorded scenarios with expected event hashes.,CI runs 20 scenarios and compares hashes.,P1-08,2,qa,tools-qa,P1,todo,dana
 P8-03,P8 Gameplay,Gameplay,Implement inventory foundation,"Items, equipment, slots, and drop/pickup events.",Inventory round-trip and equip tests pass.,P8-02,2,gameplay-dev,gameplay,P1,todo,eli
 P8-04,P8 Gameplay,Gameplay,Implement item entities,"World items with physics, prompts, and ownership.",Pickup/drop scenario works deterministically.,P8-03,2,gameplay-dev,gameplay,P1,todo,eli
