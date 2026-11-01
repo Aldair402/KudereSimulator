@@ -5,12 +5,14 @@
 //! Original C# identifiers are preserved in the porting map and serialized
 //! field names where compatibility is required; Rust code uses idiomatic names.
 
+pub mod behavior;
 pub mod events;
 pub mod input;
 pub mod registry;
 pub mod replay;
 pub mod scenario;
 pub mod systems;
+pub mod witness;
 
 use glam::{Quat, Vec3};
 use kud_core::StateHasher;
@@ -18,10 +20,12 @@ use kud_ecs::{Entity, World};
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
+pub use behavior::{BehaviorState, Suspicion, SuspicionThresholds};
 pub use events::EventQueue;
 pub use input::InputCommand;
 pub use registry::StudentRegistry;
 pub use replay::{Replay, ReplayError};
+pub use witness::{WitnessKind, WitnessMemory};
 
 /// Original reference: `StudentManagerScript.Students` index.
 pub type StudentId = u32;
@@ -67,6 +71,8 @@ pub struct Student {
     pub speed: f32,
     /// Original field: `Alive`.
     pub alive: bool,
+    /// What the student is doing, independent of the timetable phase.
+    pub state: BehaviorState,
 }
 
 /// One scheduled activity. Original reference: `StudentScript.ScheduleBlock`.
@@ -145,6 +151,14 @@ impl Default for SchoolClock {
 }
 
 impl SchoolClock {
+    /// Absolute minute since day zero, used for memory decay.
+    ///
+    /// Memory must not appear to travel back in time when the clock rolls over
+    /// at midnight, so decay is keyed to this rather than `minute`.
+    pub fn absolute_minute(&self) -> u32 {
+        u32::from(self.day) * u32::from(MINUTES_PER_DAY) + u32::from(self.minute)
+    }
+
     /// Advances the clock, rolling over into the next day.
     pub fn advance(&mut self, minutes: u16) {
         let total = u32::from(self.minute) + u32::from(minutes);
@@ -169,6 +183,20 @@ pub enum GameEvent {
     StudentNoticedPlayer {
         /// Student that noticed the player.
         student_id: StudentId,
+    },
+    /// A student changed behavior state.
+    BehaviorChanged {
+        /// Student whose state changed.
+        student_id: StudentId,
+        /// New behavior state.
+        state: BehaviorState,
+    },
+    /// A student decided to report an incident to staff.
+    IncidentReported {
+        /// Reporting student.
+        student_id: StudentId,
+        /// What was reported.
+        kind: WitnessKind,
     },
 }
 
@@ -252,7 +280,10 @@ impl Simulation {
                 destination: position,
                 speed: 1.4,
                 alive: true,
+                state: BehaviorState::Idle,
             },
+            Suspicion::default(),
+            WitnessMemory::default(),
             schedule,
         ));
         self.registry.insert(student_id, entity);
@@ -290,8 +321,11 @@ impl Simulation {
 
         input::input_system(&mut self.world, command, dt);
         systems::schedule_system(&mut self.world, self.clock.minute, &mut self.events);
-        systems::movement_system(&mut self.world, dt);
         systems::perception_system(&mut self.world, &mut self.events);
+        systems::report_system(&mut self.world, &mut self.events);
+        systems::suspicion_system(&mut self.world, &self.clock, dt);
+        systems::behavior_system(&mut self.world, &mut self.events);
+        systems::movement_system(&mut self.world, dt);
 
         self.events.flip();
         self.tick_count += 1;
@@ -317,10 +351,18 @@ impl Simulation {
             };
             hasher.write_u8(student.phase);
             hasher.write_bool(student.alive);
+            hasher.write_u8(behavior_discriminant(student.state));
             hasher.write_f32(student.speed);
             hasher.write_vec3(student.destination);
             if let Ok(position) = self.world.get::<&Position>(entity) {
                 hasher.write_vec3(position.0);
+            }
+            if let Ok(suspicion) = self.world.get::<&Suspicion>(entity) {
+                hasher.write_f32(suspicion.level);
+            }
+            if let Ok(memory) = self.world.get::<&WitnessMemory>(entity) {
+                hasher.write_u32(memory.len() as u32);
+                hasher.write_f32(memory.total_weight());
             }
         }
 
@@ -332,6 +374,23 @@ impl Simulation {
         }
 
         hasher.finish()
+    }
+}
+
+/// Stable numeric tag for a behavior state, used by the state hash.
+///
+/// Written explicitly rather than via `mem::transmute` or `Discriminant`, whose
+/// layout is not guaranteed across builds.
+fn behavior_discriminant(state: BehaviorState) -> u8 {
+    match state {
+        BehaviorState::Idle => 0,
+        BehaviorState::Walking => 1,
+        BehaviorState::Attending => 2,
+        BehaviorState::Socializing => 3,
+        BehaviorState::Investigating => 4,
+        BehaviorState::Fleeing => 5,
+        BehaviorState::Reporting => 6,
+        BehaviorState::Incapacitated => 7,
     }
 }
 

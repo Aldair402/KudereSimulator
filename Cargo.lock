@@ -76,6 +76,7 @@ dependencies = [
 name = "kud_core"
 version = "0.1.0"
 dependencies = [
+ "glam",
  "serde",
  "thiserror",
 ]
@@ -130,6 +131,8 @@ dependencies = [
  "kud_core",
  "kud_ecs",
  "serde",
+ "serde_json",
+ "thiserror",
 ]
 
 [[package]]

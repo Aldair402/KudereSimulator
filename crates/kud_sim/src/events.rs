@@ -71,6 +71,35 @@ fn event_order(event: &GameEvent) -> (StudentId, u8, u16) {
     match event {
         GameEvent::PhaseChanged { student_id, phase } => (*student_id, 0, u16::from(*phase)),
         GameEvent::StudentNoticedPlayer { student_id } => (*student_id, 1, 0),
+        GameEvent::BehaviorChanged { student_id, state } => (*student_id, 2, behavior_tag(*state)),
+        GameEvent::IncidentReported { student_id, kind } => (*student_id, 3, witness_tag(*kind)),
+    }
+}
+
+/// Stable numeric tag for a behavior state in the event ordering key.
+fn behavior_tag(state: crate::BehaviorState) -> u16 {
+    use crate::BehaviorState::*;
+    match state {
+        Idle => 0,
+        Walking => 1,
+        Attending => 2,
+        Socializing => 3,
+        Investigating => 4,
+        Fleeing => 5,
+        Reporting => 6,
+        Incapacitated => 7,
+    }
+}
+
+/// Stable numeric tag for a witness kind in the event ordering key.
+fn witness_tag(kind: crate::WitnessKind) -> u16 {
+    use crate::WitnessKind::*;
+    match kind {
+        SuspiciousItem => 0,
+        Trespassing => 1,
+        Blood => 2,
+        Violence => 3,
+        Body => 4,
     }
 }
 

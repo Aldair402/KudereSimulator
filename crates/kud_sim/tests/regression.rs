@@ -36,7 +36,7 @@ fn scripted_command(tick: u64) -> InputCommand {
 #[test]
 fn grid_100_students_600_ticks() {
     let sim = run(Scenario::Grid { students: 100 }, 600, SimConfig::default());
-    assert_eq!(sim.state_hash(), 0x3edad586d9afee41);
+    assert_eq!(sim.state_hash(), 0x482d363258121bd);
 }
 
 #[test]
@@ -46,7 +46,7 @@ fn school_day_10_students_600_ticks() {
         600,
         SimConfig::default(),
     );
-    assert_eq!(sim.state_hash(), 0x963cce80100e71e7);
+    assert_eq!(sim.state_hash(), 0xc1bd159bb7b3f8e9);
 }
 
 #[test]
@@ -56,7 +56,7 @@ fn school_day_100_students_600_ticks() {
         600,
         SimConfig::default(),
     );
-    assert_eq!(sim.state_hash(), 0xb8fe35e047415c5e);
+    assert_eq!(sim.state_hash(), 0xb4550604a27a975e);
 }
 
 #[test]
