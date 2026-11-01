@@ -20,9 +20,15 @@ Same inputs produce the same state hash, on any platform, in debug or release.
 order:
 
 1. tick count, school minute, school day, student count;
-2. for each student **in ascending `StudentId` order**: phase, alive, speed,
-   destination, position;
+2. for each student **in ascending `StudentId` order**: phase, alive, behavior
+   state tag, speed, destination, position, suspicion level, witness memory
+   length and total weight;
 3. player presence and position.
+
+The behavior state is written through an explicit `behavior_discriminant` match,
+never `mem::transmute` or `std::mem::discriminant`, whose values are not
+guaranteed stable across builds. Adding the AI fields changed every golden
+fixture; see [AI.md](AI.md) and the commit that introduced them.
 
 Deliberately excluded:
 
@@ -73,7 +79,7 @@ cargo run -p kud_runner --release -- verify --replay=run.json
 Failure output names the tick and both hashes:
 
 ```text
-error: replay desynchronized at tick 600: expected hash 0x963cce80100e71e7, got 0x538021169732d733
+error: replay desynchronized at tick 600: expected hash 0xc1bd159bb7b3f8e9, got 0x538021169732d733
 ```
 
 ## Golden fixtures
@@ -82,9 +88,9 @@ error: replay desynchronized at tick 600: expected hash 0x963cce80100e71e7, got 
 
 | Scenario | Students | Ticks | Hash |
 |---|---|---|---|
-| `grid` | 100 | 600 | `0x3edad586d9afee41` |
-| `school_day` | 10 | 600 | `0x963cce80100e71e7` |
-| `school_day` | 100 | 600 | `0xb8fe35e047415c5e` |
+| `grid` | 100 | 600 | `0x0482d363258121bd` |
+| `school_day` | 10 | 600 | `0xc1bd159bb7b3f8e9` |
+| `school_day` | 100 | 600 | `0xb4550604a27a975e` |
 
 CI runs them in **both debug and release**, because an optimization-sensitive
 float path would otherwise pass locally and fail in a packaged build.

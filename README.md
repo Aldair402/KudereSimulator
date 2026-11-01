@@ -72,6 +72,7 @@ The backlog is machine-readable and designed for a team:
 - [`tasks/tasks.csv`](tasks/tasks.csv) — importable backlog with owners and estimates.
 - [`docs/TEAM_WORKFLOW.md`](docs/TEAM_WORKFLOW.md) — squads, review rules, definition of done.
 - [`docs/REPLAY.md`](docs/REPLAY.md) — replay format, state hashing, golden fixtures.
+- [`docs/AI.md`](docs/AI.md) — student states, suspicion, witness memory, and known gaps.
 - [`CONTRIBUTING.md`](CONTRIBUTING.md) — setup, branch naming, and PR checklist.
 
 Distribute work across a roster:

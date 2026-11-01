@@ -190,7 +190,7 @@ Estimated focused days: 12.5
   - Acceptance: Clock transitions emit events; schedule system consumes phase.
   - Depends on: P2-05
 
-- [ ] **P2-09 — Add student state machine foundation** (`P0`, `sim-dev`, `simulation`, 2d)
+- [x] **P2-09 — Add student state machine foundation** (`P0`, `sim-dev`, `simulation`, 2d)
   - Epic: ECS
   - Description: Data-driven states and transitions instead of giant Update branches.
   - Acceptance: State transition table tested; no dynamic dispatch in hot loop.
@@ -456,13 +456,13 @@ Estimated focused days: 22
   - Acceptance: 10-student day loop runs without manual intervention.
   - Depends on: P2-09
 
-- [ ] **P7-02 — Implement attention and suspicion** (`P1`, `sim-dev`, `simulation`, 2d)
+- [x] **P7-02 — Implement attention and suspicion** (`P1`, `sim-dev`, `simulation`, 2d)
   - Epic: AI
   - Description: Suspicion accumulation, decay, and reporting thresholds.
   - Acceptance: Suspicion tests cover sight, sound, and memory decay.
   - Depends on: P2-07
 
-- [ ] **P7-03 — Implement witness memory** (`P1`, `sim-dev`, `simulation`, 2d)
+- [x] **P7-03 — Implement witness memory** (`P1`, `sim-dev`, `simulation`, 2d)
   - Epic: AI
   - Description: Store witnessed events with confidence and decay.
   - Acceptance: Witness report changes based on elapsed time and evidence.

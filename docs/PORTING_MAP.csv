@@ -13,6 +13,11 @@ SanityScript,,kud_sim,sanity,module,P2,todo,Data-driven effects
 Camera.main,,kud_render,CameraDesc,resource,P1,todo,Explicit camera instead of global lookup
 GameObject.Find,,kud_ecs,stable ID lookup,pattern,P0,todo,Do not port name-based search
 GetComponent,,kud_ecs,ECS query,pattern,P0,todo,Do not port per-frame lookup
-Debug.Log,,kud_core,tracing,pattern,P0,todo,Structured level-filtered logging
 YandereScript,Update input reads,kud_sim,input::input_system,system,P0,done,Quantized i8 axes applied per tick; replayable
 Debug.Log,,kud_core,tracing,pattern,P0,done,Structured logging; no hot-path logging
+StudentScript,Update state branches,kud_sim,behavior::next_state,system,P1,done,Pure state machine; 8 states with ordered suspicion bands
+StudentScript,suspicion fields,kud_sim,Suspicion,component,P1,done,Per-student thresholds; visibility-weighted integration
+StudentScript,witness flags,kud_sim,witness::WitnessMemory,component,P1,done,Confidence decay replaces permanent booleans; bounded and deduplicated
+StudentScript,vision cone check,kud_sim,systems::visibility,system,P1,done,Range and cone with edge falloff; occlusion pending P6-04
+StudentScript,report to teacher,kud_sim,systems::report_system,system,P1,done,Emits IncidentReported once per incident; consumer pending
+StudentScript,flee movement,kud_sim,systems::behavior_system,system,P1,done,Escape target away from threat; straight line until pathfinding lands

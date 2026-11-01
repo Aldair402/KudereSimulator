@@ -1,6 +1,6 @@
 # Task assignments
 
-Assigned: 109
+Assigned: 106
 Unassigned: 0
 
 ## aldair — 10 days
@@ -33,10 +33,9 @@ Unassigned: 0
 - [ ] **P9-05** Implement input mapping (`P1`, 2d)
 - [ ] **P9-06** Implement gamepad support (`P2`, 1d)
 
-## bea — 48 days
+## bea — 42 days
 
 - [ ] **P12-08** Complete asset replacement pass (`P0`, 3d)
-- [ ] **P2-09** Add student state machine foundation (`P0`, 2d)
 - [ ] **P11-11** Optimize simulation hot paths (`P1`, 3d)
 - [ ] **P12-06** Complete 100-student benchmark (`P1`, 3d)
 - [ ] **P5-01** Define animation state machine schema (`P1`, 1d)
@@ -49,8 +48,6 @@ Unassigned: 0
 - [ ] **P6-04** Implement raycast/occlusion queries (`P1`, 1d)
 - [ ] **P6-05** Select pathfinding approach (`P1`, 1d)
 - [ ] **P6-06** Implement path queries (`P1`, 3d)
-- [ ] **P7-02** Implement attention and suspicion (`P1`, 2d)
-- [ ] **P7-03** Implement witness memory (`P1`, 2d)
 - [ ] **P5-07** Add interaction animation hooks (`P2`, 2d)
 - [ ] **P6-07** Implement crowd avoidance (`P2`, 2d)
 - [ ] **P7-04** Implement reputation effects (`P2`, 2d)
