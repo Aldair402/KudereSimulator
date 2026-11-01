@@ -1,12 +1,12 @@
 original_type,original_member,rust_crate,rust_item,kind,priority,status,notes
-StudentScript,,kud_sim,Student,component,P0,in-progress,Runtime student state; split behavior into systems
-StudentScript,StudentID,kud_sim,Student.student_id,field,P0,in-progress,Stable domain ID
-StudentScript,Phase,kud_sim,Student.phase,field,P0,in-progress,Schedule phase
-StudentScript,Alive,kud_sim,Student.alive,field,P0,in-progress,Alive flag
-StudentScript,ScheduleBlock,kud_sim,ScheduleBlock,data,P0,in-progress,Daily schedule block
-StudentManagerScript,Students,kud_sim,Simulation.world,system,P0,todo,Replace array manager with ECS and ID map
-YandereScript,,kud_sim,Player,component,P0,in-progress,Player marker; controller to be added
-ClockScript,PresentTime,kud_sim,SchoolClock.minute,field,P0,in-progress,School clock
+StudentScript,,kud_sim,Student,component,P0,done,Runtime student state; split behavior into systems
+StudentScript,StudentID,kud_sim,Student.student_id,field,P0,done,Stable domain ID
+StudentScript,Phase,kud_sim,Student.phase,field,P0,done,Schedule phase
+StudentScript,Alive,kud_sim,Student.alive,field,P0,done,Alive flag
+StudentScript,ScheduleBlock,kud_sim,ScheduleBlock,data,P0,done,Daily schedule block
+StudentManagerScript,Students,kud_sim,StudentRegistry,system,P0,done,BTreeMap keyed by StudentId; generational entities behind it
+YandereScript,,kud_sim,Player,component,P0,in-progress,Marker and command-driven movement done; interaction pending
+ClockScript,PresentTime,kud_sim,SchoolClock.minute,field,P0,done,School clock
 Pathfinder,,kud_sim,navigation,module,P1,todo,Pathfinding and avoidance
 DialogueScript,,kud_sim,dialogue,module,P2,todo,Data-driven dialogue state machine
 SanityScript,,kud_sim,sanity,module,P2,todo,Data-driven effects
@@ -14,3 +14,5 @@ Camera.main,,kud_render,CameraDesc,resource,P1,todo,Explicit camera instead of g
 GameObject.Find,,kud_ecs,stable ID lookup,pattern,P0,todo,Do not port name-based search
 GetComponent,,kud_ecs,ECS query,pattern,P0,todo,Do not port per-frame lookup
 Debug.Log,,kud_core,tracing,pattern,P0,todo,Structured level-filtered logging
+YandereScript,Update input reads,kud_sim,input::input_system,system,P0,done,Quantized i8 axes applied per tick; replayable
+Debug.Log,,kud_core,tracing,pattern,P0,done,Structured logging; no hot-path logging

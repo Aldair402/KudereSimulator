@@ -43,15 +43,26 @@ Requires Rust 1.85 or newer.
 ```bash
 cargo test --workspace
 cargo clippy --workspace --all-targets -- -D warnings
-cargo run -p kud_runner --release -- --frames=600 --students=100 --hz=60
+
+# Benchmark with frame-time percentiles.
+cargo run -p kud_runner --release -- bench --frames=600 --students=100 --hz=60
+
+# Record and verify a deterministic replay.
+cargo run -p kud_runner --release -- record --scenario=school_day --students=10 --ticks=600 --out=run.json
+cargo run -p kud_runner --release -- verify --replay=run.json
 ```
 
 The runner is headless, so it works over SSH and in CI without a display server.
 Example output:
 
 ```json
-{"draws":60600,"elapsed_ms":2.370055,"events":100,"fixed_hz":60,"fixed_steps":600,"frames":600,"sim_ticks":600,"students":100}
+{"command":"bench","scenario":"school_day","frames":600,"students":100,"fixed_hz":60,
+ "fixed_steps":600,"draws":60600,"events":300,"frame_us":{"p50":2,"p95":2,"p99":4,"max":15},
+ "state_hash":"0xeb8f9671cfa68e1d"}
 ```
+
+Determinism is enforced by golden state hashes checked in debug **and** release.
+See [`docs/REPLAY.md`](docs/REPLAY.md).
 
 ## Contributing
 
@@ -60,6 +71,7 @@ The backlog is machine-readable and designed for a team:
 - [`TODO.md`](TODO.md) — 130 tasks across 13 phases, with acceptance criteria.
 - [`tasks/tasks.csv`](tasks/tasks.csv) — importable backlog with owners and estimates.
 - [`docs/TEAM_WORKFLOW.md`](docs/TEAM_WORKFLOW.md) — squads, review rules, definition of done.
+- [`docs/REPLAY.md`](docs/REPLAY.md) — replay format, state hashing, golden fixtures.
 - [`CONTRIBUTING.md`](CONTRIBUTING.md) — setup, branch naming, and PR checklist.
 
 Distribute work across a roster:
@@ -81,7 +93,8 @@ python3 tools/generate_plan.py
 - Original C# names are preserved as doc-comment references and, where a file
   format demands it, via `#[serde(rename = "...")]`.
 - No `GameObject.Find`, `Camera.main`, or per-frame `GetComponent` patterns.
-- Simulation is deterministic: fixed step, seeded RNG, stable event ordering.
+- Simulation is deterministic: fixed step, quantized input, double-buffered events,
+  canonical state hashing verified against golden fixtures.
 - No original game code or assets are committed. See [`docs/LEGAL.md`](docs/LEGAL.md).
 
 ## License

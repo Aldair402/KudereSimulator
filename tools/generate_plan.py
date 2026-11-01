@@ -170,6 +170,24 @@ add(P, "Parity", "Complete asset replacement pass", "Replace or license all asse
 add(P, "Parity", "Conduct external playtest", "Run structured playtest and collect metrics/feedback.", "Playtest report with top issues and triage.", "P12-05", 2, "qa", "tools-qa", "P2")
 add(P, "Parity", "Publish internal alpha", "Tag alpha, package builds, and document known gaps.", "Alpha release checklist complete.", "P12-09", 1, "producer", "leads", "P2")
 
+# Status is tracked here so regenerating the backlog never resets progress.
+DONE_TASKS = {
+    "P0-03", "P0-04", "P0-05", "P0-08",
+    "P1-01", "P1-08", "P1-09",
+    "P2-02", "P2-03", "P2-04", "P2-05", "P2-06", "P2-07", "P2-08",
+    "P3-01", "P3-02",
+    "P10-07", "P11-01", "P11-06",
+}
+IN_PROGRESS_TASKS = {"P0-06", "P7-01"}
+
+T = [
+    (*row[:11],
+     "done" if row[0] in DONE_TASKS
+     else "in-progress" if row[0] in IN_PROGRESS_TASKS
+     else "todo")
+    for row in T
+]
+
 PHASES = list(dict.fromkeys(x[1] for x in T))
 
 def md_escape(s: str) -> str:
@@ -195,7 +213,7 @@ for phase in PHASES:
     lines += [f"## {phase}", "", f"Estimated focused days: {days:g}", ""]
     for tid, ph, epic, title, desc, acc, dep, day, role, squad, pri, status in items:
         lines += [
-            f"- [ ] **{tid} — {title}** (`{pri}`, `{role}`, `{squad}`, {day}d)",
+            f"- [{'x' if status == 'done' else ' '}] **{tid} — {title}** (`{pri}`, `{role}`, `{squad}`, {day}d)",
             f"  - Epic: {epic}",
             f"  - Description: {desc}",
             f"  - Acceptance: {acc}",

@@ -24,5 +24,14 @@ jobs:
         run: cargo clippy --workspace --all-targets -- -D warnings
       - name: Test
         run: cargo test --workspace
+      - name: Release-mode regression
+        run: cargo test --workspace --release
       - name: Headless benchmark
-        run: cargo run -p kud_runner --release -- --frames=600 --students=100 --hz=60
+        run: cargo run -p kud_runner --release -- bench --frames=600 --students=100 --hz=60
+      - name: School day benchmark
+        run: cargo run -p kud_runner --release -- bench --scenario=school_day --frames=600 --students=100
+      - name: Replay round trip
+        shell: bash
+        run: |
+          cargo run -p kud_runner --release -- record --scenario=school_day --students=10 --ticks=600 --out=replay.json
+          cargo run -p kud_runner --release -- verify --replay=replay.json

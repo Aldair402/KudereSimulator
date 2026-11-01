@@ -26,19 +26,19 @@ Estimated focused days: 10.5
   - Acceptance: Reference capture template exists; one sample behavior captured.
   - Depends on: P0-01
 
-- [ ] **P0-03 — Set repository, branch, and review rules** (`P0`, `tech-lead`, `leads`, 0.5d)
+- [x] **P0-03 — Set repository, branch, and review rules** (`P0`, `tech-lead`, `leads`, 0.5d)
   - Epic: Governance
   - Description: Initialize repo, protect main, require CI and one engine-area reviewer.
   - Acceptance: main protected; PR template and CODEOWNERS merged.
   - Depends on: P0-01
 
-- [ ] **P0-04 — Define performance budgets** (`P0`, `tech-lead`, `engine`, 1d)
+- [x] **P0-04 — Define performance budgets** (`P0`, `tech-lead`, `engine`, 1d)
   - Epic: Governance
   - Description: Set frame, simulation, render, memory, and load-time budgets for target hardware.
   - Acceptance: Budgets documented and enforced by a benchmark stub.
   - Depends on: P0-01
 
-- [ ] **P0-05 — Define deterministic replay format** (`P0`, `engine-dev`, `engine`, 1d)
+- [x] **P0-05 — Define deterministic replay format** (`P0`, `engine-dev`, `engine`, 1d)
   - Epic: Governance
   - Description: Specify input stream, RNG seed, tick count, and state hash format.
   - Acceptance: Replay schema documented; two identical runs produce same hash in skeleton.
@@ -56,7 +56,7 @@ Estimated focused days: 10.5
   - Acceptance: Inventory exists; every asset has license/replacement decision.
   - Depends on: P0-01
 
-- [ ] **P0-08 — Set up CI matrix** (`P0`, `tools-dev`, `tools-qa`, 1d)
+- [x] **P0-08 — Set up CI matrix** (`P0`, `tools-dev`, `tools-qa`, 1d)
   - Epic: Governance
   - Description: Run fmt, clippy, tests, and headless runner on Linux and Windows.
   - Acceptance: CI green on skeleton; artifacts include benchmark JSON.
@@ -78,7 +78,7 @@ Estimated focused days: 10.5
 
 Estimated focused days: 14
 
-- [ ] **P1-01 — Harden fixed-step clock** (`P0`, `engine-dev`, `engine`, 1d)
+- [x] **P1-01 — Harden fixed-step clock** (`P0`, `engine-dev`, `engine`, 1d)
   - Epic: Core
   - Description: Add pause, time scale, max-delta policy, and deterministic tick counters.
   - Acceptance: Unit tests cover pause, hitch, time scale, and substep budget.
@@ -120,13 +120,13 @@ Estimated focused days: 14
   - Acceptance: Frame allocations measured; zero heap growth in steady-state headless loop.
   - Depends on: P1-06
 
-- [ ] **P1-08 — Add state hashing** (`P0`, `engine-dev`, `engine`, 1d)
+- [x] **P1-08 — Add state hashing** (`P0`, `engine-dev`, `engine`, 1d)
   - Epic: Core
   - Description: Hash simulation state for replay and regression tests.
   - Acceptance: State hash stable across runs; documented exclusions.
   - Depends on: P0-05
 
-- [ ] **P1-09 — Add input command buffer** (`P1`, `engine-dev`, `engine`, 1d)
+- [x] **P1-09 — Add input command buffer** (`P1`, `engine-dev`, `engine`, 1d)
   - Epic: Core
   - Description: Buffer raw input into tick-stamped commands.
   - Acceptance: Replay can feed commands without platform input.
@@ -148,43 +148,43 @@ Estimated focused days: 12.5
   - Acceptance: Schema guide merged; example components reviewed.
   - Depends on: -
 
-- [ ] **P2-02 — Add system scheduling stages** (`P0`, `engine-dev`, `simulation`, 1d)
+- [x] **P2-02 — Add system scheduling stages** (`P0`, `engine-dev`, `simulation`, 1d)
   - Epic: ECS
   - Description: Create explicit stages: input, schedule, AI, movement, perception, events, animation prep.
   - Acceptance: Systems run in declared order; stage graph documented.
   - Depends on: P2-01
 
-- [ ] **P2-03 — Add event queues** (`P0`, `engine-dev`, `simulation`, 1d)
+- [x] **P2-03 — Add event queues** (`P0`, `engine-dev`, `simulation`, 1d)
   - Epic: ECS
   - Description: Double-buffered typed events with deterministic ordering.
   - Acceptance: Events produced in tick N are consumed in N+1; tests pass.
   - Depends on: P2-02
 
-- [ ] **P2-04 — Add stable entity handles** (`P0`, `engine-dev`, `simulation`, 1d)
+- [x] **P2-04 — Add stable entity handles** (`P0`, `engine-dev`, `simulation`, 1d)
   - Epic: ECS
   - Description: Generational handles and lookup from original student IDs.
   - Acceptance: Destroyed handle cannot access new entity; ID map tested.
   - Depends on: P2-01
 
-- [ ] **P2-05 — Add schedule data model** (`P0`, `sim-dev`, `simulation`, 1d)
+- [x] **P2-05 — Add schedule data model** (`P0`, `sim-dev`, `simulation`, 1d)
   - Epic: ECS
   - Description: Represent daily schedule blocks, destinations, actions, and phase transitions.
   - Acceptance: Schedule serialization round-trips; phase transition tests pass.
   - Depends on: P2-02
 
-- [ ] **P2-06 — Add movement system** (`P0`, `sim-dev`, `simulation`, 1d)
+- [x] **P2-06 — Add movement system** (`P0`, `sim-dev`, `simulation`, 1d)
   - Epic: ECS
   - Description: Move agents toward destinations with speed, arrival, and pause support.
   - Acceptance: Deterministic movement tests; no per-frame allocations.
   - Depends on: P2-05
 
-- [ ] **P2-07 — Add perception system** (`P0`, `sim-dev`, `simulation`, 2d)
+- [x] **P2-07 — Add perception system** (`P0`, `sim-dev`, `simulation`, 2d)
   - Epic: ECS
   - Description: Vision range, FOV, occlusion hooks, and attention events.
   - Acceptance: FOV tests pass; occlusion interface documented.
   - Depends on: P2-06
 
-- [ ] **P2-08 — Add school clock and phases** (`P0`, `sim-dev`, `simulation`, 1d)
+- [x] **P2-08 — Add school clock and phases** (`P0`, `sim-dev`, `simulation`, 1d)
   - Epic: ECS
   - Description: Morning, class, lunch, cleaning, club, end-of-day phases.
   - Acceptance: Clock transitions emit events; schedule system consumes phase.
@@ -206,13 +206,13 @@ Estimated focused days: 12.5
 
 Estimated focused days: 16
 
-- [ ] **P3-01 — Define asset ID and manifest schema** (`P0`, `tools-dev`, `assets`, 1d)
+- [x] **P3-01 — Define asset ID and manifest schema** (`P0`, `tools-dev`, `assets`, 1d)
   - Epic: Assets
   - Description: Stable u64 IDs, kind, source path, import settings, and dependencies.
   - Acceptance: Manifest schema documented; duplicate ID rejected.
   - Depends on: -
 
-- [ ] **P3-02 — Implement asset registry** (`P0`, `tools-dev`, `assets`, 1d)
+- [x] **P3-02 — Implement asset registry** (`P0`, `tools-dev`, `assets`, 1d)
   - Epic: Assets
   - Description: Load manifest, resolve IDs, and report missing dependencies.
   - Acceptance: Missing asset error includes ID and source path.
@@ -690,7 +690,7 @@ Estimated focused days: 17
   - Acceptance: Replay regression CI job passes.
   - Depends on: P0-05
 
-- [ ] **P10-07 — Implement benchmark harness** (`P0`, `qa`, `tools-qa`, 2d)
+- [x] **P10-07 — Implement benchmark harness** (`P0`, `qa`, `tools-qa`, 2d)
   - Epic: Tools
   - Description: Run standard scenes and emit JSON/CSV metrics.
   - Acceptance: Benchmark compares against budgets and previous run.
@@ -706,7 +706,7 @@ Estimated focused days: 17
 
 Estimated focused days: 21.5
 
-- [ ] **P11-01 — Enforce fmt and clippy in CI** (`P0`, `tools-dev`, `tools-qa`, 0.5d)
+- [x] **P11-01 — Enforce fmt and clippy in CI** (`P0`, `tools-dev`, `tools-qa`, 0.5d)
   - Epic: Quality
   - Description: Deny warnings for library code and require formatting.
   - Acceptance: CI fails on fmt/clippy violations.
@@ -736,7 +736,7 @@ Estimated focused days: 21.5
   - Acceptance: CI flags >5% memory regression.
   - Depends on: P1-07
 
-- [ ] **P11-06 — Add frame-time regression checks** (`P0`, `qa`, `tools-qa`, 1d)
+- [x] **P11-06 — Add frame-time regression checks** (`P0`, `qa`, `tools-qa`, 1d)
   - Epic: Quality
   - Description: Track p50/p95/p99 frame and sim time.
   - Acceptance: CI flags budget violations.
